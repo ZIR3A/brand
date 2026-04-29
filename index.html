@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZIREA | The Future of Innovation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #030305;
+      --bg-secondary: #0a0a0f;
+      --bg-tertiary: #12121a;
+      --text-primary: #ffffff;
+      --text-secondary: #8a8a9a;
+      --accent-primary: #00f0ff;
+      --accent-secondary: #00f0ff;
+      --accent-tertiary: #00f0ff;
+      --glow-cyan: rgba(0, 240, 255, 0.5);
+      --glow-magenta: rgba(0, 240, 255, 0.3);
+      --font-primary: 'Orbitron', sans-serif;
+      --font-secondary: 'Exo 2', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-secondary);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 20px 0;
+      transition: all 0.4s ease;
+    }
+
+    .nav.scrolled {
+      background: rgba(3, 3, 5, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 16px 0;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: var(--font-primary);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      background: var(--accent-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent-primary);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      padding: 12px 28px;
+      font-family: var(--font-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      padding: 2px;
+      background: var(--accent-primary);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-primary);
+      transform: scale(1.05);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 240, 255, 0.03) 2px,
+          rgba(0, 240, 255, 0.03) 4px
+        );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-noise {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 2;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 900px;
+      padding: 0 24px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 24px;
+      padding: 8px 20px;
+      border: 1px solid var(--glow-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-title {
+      font-family: var(--font-primary);
+      font-size: clamp(40px, 8vw, 80px);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 50%, var(--text-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-title span {
+      background: var(--accent-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 40px;
+      font-family: var(--font-secondary);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: var(--accent-primary);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hero-cta:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px var(--glow-cyan);
+    }
+
+    .hero-cta svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .hero-cta:hover svg {
+      transform: translateX(4px);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    .scroll-indicator .mouse {
+      width: 24px;
+      height: 40px;
+      border: 2px solid var(--text-secondary);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .scroll-indicator .mouse::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 8px;
+      background: var(--accent-primary);
+      border-radius: 2px;
+      animation: scroll 1.5s ease-in-out infinite;
+    }
+
+    @keyframes scroll {
+      0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 0.3; transform: translateX(-50%) translateY(12px); }
+    }
+
+    /* Features Section */
+    .features {
+      padding: 120px 0;
+      background: transparent;
+      position: relative;
+    }
+
+    .features::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+      opacity: 0.3;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-primary);
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-scroll-wrapper {
+      width: 100vw;
+      overflow: visible;
+      margin-left: calc(-50vw + 50%);
+      margin-right: calc(-50vw + 50%);
+    }
+
+    .features-grid {
+      display: flex;
+      gap: 30px;
+      padding: 40px 5vw;
+      width: max-content;
+    }
+
+    .feature-card {
+      flex: 0 0 380px;
+      padding: 48px 36px;
+      background: rgba(18, 18, 26, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 20px 40px rgba(0, 240, 255, 0.15);
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(135deg, transparent 40%, var(--accent-primary), transparent 60%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: transparent;
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 170, 0.1));
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .feature-icon::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 12px;
+      padding: 1px;
+      background: var(--accent-primary);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .feature-icon svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--accent-primary);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .feature-title {
+      font-family: var(--font-primary);
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .feature-desc {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Stats Section */
+    .stats {
+      padding: 120px 0;
+      background: transparent;
+      position: relative;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    .stat-item::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 1px;
+      height: 60%;
+      background: linear-gradient(to bottom, transparent, var(--accent-primary), transparent);
+      opacity: 0.3;
+      transform: translateY(-50%);
+    }
+
+    .stat-item:first-child::before {
+      display: none;
+    }
+
+    .stat-number {
+      font-family: var(--font-primary);
+      font-size: clamp(48px, 6vw, 72px);
+      font-weight: 700;
+      background: var(--accent-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    /* CTA Section */
+    .cta {
+      padding: 120px 0;
+      background: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--glow-cyan) 0%, transparent 70%);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .cta-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .cta-title {
+      font-family: var(--font-primary);
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .cta-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 48px;
+      font-family: var(--font-secondary);
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .cta-button span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-button:hover {
+      transform: scale(1.05);
+    }
+
+    .cta-button:hover::before {
+      background: var(--accent-primary);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 60px 0;
+      background: rgba(3, 3, 5, 0.5);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: var(--font-primary);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      background: var(--accent-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+
+    .footer-social a:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      box-shadow: 0 0 20px var(--glow-cyan);
+    }
+
+    .footer-social svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .feature-card {
+        flex: 0 0 320px;
+      }
+      
+      .features-grid {
+        padding: 30px 3vw;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .features-scroll-wrapper {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+      }
+      
+      .features-grid {
+        padding: 30px 2vw;
+      }
+
+      .feature-card {
+        flex: 0 0 300px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px 20px;
+      }
+
+      .stat-item:nth-child(2)::before {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      
+      /* Horizontal scroll features - disable pin on mobile, enable swipe */
+      .features-scroll-wrapper {
+        width: 100vw;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        margin-left: 0;
+        margin-right: 0;
+      }
+      
+      .features-scroll-wrapper::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .features-grid {
+        padding: 20px 4vw;
+        gap: 16px;
+        width: max-content;
+      }
+      
+      .feature-card {
+        flex: 0 0 260px;
+        padding: 28px 20px;
+      }
+      
+      .feature-icon {
+        width: 48px;
+        height: 48px;
+      }
+      
+      .feature-icon svg {
+        width: 24px;
+        height: 24px;
+      }
+      
+      .feature-title {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      
+      .feature-desc {
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      
+      .hero-title {
+        font-size: 36px;
+      }
+      
+      .hero-desc {
+        font-size: 16px;
+        padding: 0 20px;
+      }
+      
+      .section-title {
+        font-size: 28px;
+      }
+      
+      .section-desc {
+        font-size: 16px;
+      }
+
+      .features-scroll-wrapper {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        overflow: visible;
+      }
+      
+      .features-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px 5vw;
+        width: 100%;
+      }
+      
+      .feature-card {
+        flex: none;
+        width: 100%;
+        max-width: 100%;
+        padding: 32px 24px;
+      }
+      
+      .feature-title {
+        font-size: 18px;
+      }
+      
+      .feature-desc {
+        font-size: 14px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      
+      .stat-item::before {
+        display: none;
+      }
+      
+      .stat-number {
+        font-size: 48px;
+      }
+
+      .cta-title {
+        font-size: 28px;
+      }
+      
+      .cta-desc {
+        font-size: 16px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .features, .stats, .cta {
+        padding: 60px 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 28px;
+      }
+      
+      .hero-tag {
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+      
+      .feature-card {
+        flex: 0 0 260px;
+      }
+      
+      .stat-number {
+        font-size: 40px;
+      }
+      
+      .stat-label {
+        font-size: 12px;
+      }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .scroll-indicator .mouse::before {
+        animation: none;
+      }
+    }
+
+    /* Loading state */
+    .model-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--accent-primary);
+      font-family: var(--font-primary);
+      font-size: 14px;
+      letter-spacing: 2px;
+    }
+
+    /* Page Loader */
+    .page-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #030305 !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999 !important;
+      transition: opacity 0.5s ease;
+    }
+
+    .page-loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Hide body content while loading */
+    body.loading > *:not(.page-loader):not(.nav) {
+      visibility: hidden !important;
+    }
+
+    body.loading .page-loader {
+      display: flex !important;
+      visibility: visible !important;
+    }
+
+    body.loading .nav {
+      display: none !important;
+    }
+
+    body.loading #canvas-container {
+      visibility: hidden !important;
+    }
+
+    body.loading {
+      overflow: hidden !important;
+    }
+
+    body.loaded > *:not(.page-loader) {
+      visibility: visible !important;
+    }
+    
+    body.loaded .nav {
+      display: block !important;
+    }
+    
+    body.loaded #canvas-container {
+      visibility: visible !important;
+    }
+
+    .loader-content {
+      text-align: center;
+    }
+
+    .loader-logo {
+      font-family: var(--font-primary);
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      color: var(--accent-primary);
+      margin-bottom: 40px;
+      text-shadow: 0 0 30px var(--glow-cyan);
+    }
+
+    .loader-bar {
+      width: 300px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      overflow: visible !important;
+      margin: 0 auto 20px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    .loader-progress {
+      height: 100%;
+      width: 0%;
+      background: #00f0ff;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+    }
+
+    .loader-text {
+      font-family: var(--font-primary);
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: var(--text-secondary);
+    }
+  </style>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Three.js Scene
+    let scene, camera, renderer, mainGroup, particles, grid, clock;
+    let mouseX = 0, mouseY = 0;
+    let targetX = 0, targetY = 0;
+    let scrollProgress = 0;
+
+    function initThreeJS() {
+      const container = document.getElementById('canvas-container');
+      const loadingEl = document.getElementById('loading');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      // Scene
+      scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x030305, 8, 45);
+
+// Camera - positioned for full view including head
+      camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+      camera.position.set(0, 4, 40);
+      camera.lookAt(0, 4, 0);
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x030305, 1);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
+      container.appendChild(renderer.domElement);
+
+      // Clock for animation
+      clock = new THREE.Clock();
+
+      // Main group for 3D elements
+      mainGroup = new THREE.Group();
+      scene.add(mainGroup);
+
+      // Start loader progress simulation from 0
+      window.loadStartTime = Date.now();
+      window.lastReportedPercent = 0;
+      
+      // Progress: 0% to 55%, then wait for GLTF
+      window.modelLoadInterval = setInterval(function() {
+        if (window.lastReportedPercent < 55) {
+          var elapsed = Date.now() - window.loadStartTime;
+          var newPercent = Math.min(55, Math.floor(elapsed / 50));
+          
+          if (newPercent > window.lastReportedPercent) {
+            window.lastReportedPercent = newPercent;
+            
+            var progressEl = document.getElementById('loader-progress');
+            var textEl = document.getElementById('loader-text');
+            
+            // SYNC: Update both at same time
+            var display = newPercent + '%';
+            if (progressEl) {
+              progressEl.style.width = newPercent + '%';
+            }
+            if (textEl) textEl.textContent = 'LOADING... ' + newPercent + '%';
+          }
+        } else {
+          clearInterval(window.modelLoadInterval);
+        }
+      }, 200);
+
+      // Load GLTF model
+      const loader = new GLTFLoader();
+      loader.load(
+        'quaternius_cc0-george-1063.glb',
+        (gltf) => {
+          const model = gltf.scene;
+          const box = new THREE.Box3().setFromObject(model);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          const targetHeight = 5;
+          const scale = targetHeight / size.y;
+          model.scale.set(scale, scale, scale);
+          model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+          model.name = 'cyborgModel';
+          mainGroup.add(model);
+          
+          if (gltf.animations && gltf.animations.length > 0) {
+            window.animMixer = new THREE.AnimationMixer(model);
+            const animIndex = 16;
+            const animClip = gltf.animations[animIndex];
+            const action = window.animMixer.clipAction(animClip);
+            action.setLoop(THREE.LoopRepeat);
+            action.clampWhenFinished = false;
+            action.play();
+            window.modelAnimClip = animClip;
+            window.lastScrollTime = 0;
+          }
+          
+          if (loadingEl) loadingEl.style.display = 'none';
+          
+          // Stop loading simulation
+          if (window.modelLoadInterval) {
+            clearInterval(window.modelLoadInterval);
+          }
+          
+          // Set page loader to 100%
+          var progressBar = document.getElementById('loader-progress');
+          var loaderText = document.getElementById('loader-text');
+          if (progressBar) {
+            progressBar.style.width = '100%';
+            progressBar.style.transition = 'width 0.3s ease';
+          }
+          if (loaderText) loaderText.textContent = 'COMPLETE';
+          
+          // Hide page loader and show body content
+          const pageLoader = document.getElementById('page-loader');
+          if (pageLoader) {
+            pageLoader.classList.add('hidden');
+            setTimeout(() => {
+              pageLoader.remove();
+              document.body.classList.remove('loading');
+              document.body.classList.add('loaded');
+            }, 300);
+          }
+        },
+        (progress) => {
+          let percent = 0;
+          if (progress.total && progress.total > 0) {
+            percent = Math.round((progress.loaded / progress.total) * 100);
+          }
+          // Cap at 90% to let timer finish naturally
+          if (percent >= 55) percent = 55;
+          
+          if (percent > window.lastReportedPercent) {
+            window.lastReportedPercent = percent;
+            
+            var progressEl = document.getElementById('loader-progress');
+            var textEl = document.getElementById('loader-text');
+            
+            // SYNC: Both progress bar and text show same value
+            if (progressEl) progressEl.style.width = percent + '%';
+            if (textEl) textEl.textContent = 'LOADING... ' + percent + '%';
+          }
+        },
+        (error) => {
+          console.error('Error loading model:', error);
+          if (window.modelLoadInterval) {
+            clearInterval(window.modelLoadInterval);
+          }
+          addFallbackGeometry();
+        }
+      );
+
+      function addFallbackGeometry() {
+        const icoGeometry = new THREE.IcosahedronGeometry(2.5, 0);
+        const icoMaterial = new THREE.MeshBasicMaterial({
+          color: 0x00f0ff,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.7
+        });
+        const icosahedron = new THREE.Mesh(icoGeometry, icoMaterial);
+        icosahedron.name = 'cyborgModel';
+        mainGroup.add(icosahedron);
+        if (loadingEl) loadingEl.style.display = 'none';
+      }
+
+      // Floating octahedrons
+      const createSatellite = (size, color, x, y, z, speed) => {
+        const geo = new THREE.OctahedronGeometry(size, 0);
+        const mat = new THREE.MeshBasicMaterial({
+          color: color,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.5
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(x, y, z);
+        mesh.userData.speed = speed;
+        mesh.userData.offset = Math.random() * Math.PI * 2;
+        return mesh;
+      };
+
+      const satellites = [
+        createSatellite(0.25, 0x00f0ff, 4, 1.5, 0, 0.5),
+        createSatellite(0.2, 0xff00aa, -3.5, 0, 1, 0.7),
+        createSatellite(0.3, 0x7b2dff, 2.5, -1.5, -1, 0.4),
+        createSatellite(0.15, 0x00f0ff, -2, 2.5, 0.5, 0.6),
+        createSatellite(0.22, 0xff00aa, 1, -2.5, 1.5, 0.35)
+      ];
+      satellites.forEach(s => {
+        s.name = 'satellite';
+        mainGroup.add(s);
+      });
+
+      // Particles
+      const particleCount = prefersReducedMotion ? 250 : 600;
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        positions[i3] = (Math.random() - 0.5) * 60;
+        positions[i3 + 1] = (Math.random() - 0.5) * 40;
+        positions[i3 + 2] = (Math.random() - 0.5) * 40;
+        const colorChoice = Math.random();
+        let color;
+        if (colorChoice > 0.66) color = new THREE.Color(0x00f0ff);
+        else if (colorChoice > 0.33) color = new THREE.Color(0xff00aa);
+        else color = new THREE.Color(0x7b2dff);
+        colors[i3] = color.r;
+        colors[i3 + 1] = color.g;
+        colors[i3 + 2] = color.b;
+      }
+      const particleGeometry = new THREE.BufferGeometry();
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      const particleMaterial = new THREE.PointsMaterial({
+        size: 0.06,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending
+      });
+      particles = new THREE.Points(particleGeometry, particleMaterial);
+      particles.name = 'particles';
+      scene.add(particles);
+
+      // Grid floor
+      const gridHelper = new THREE.GridHelper(50, 50, 0x00f0ff, 0x0a0a0f);
+      gridHelper.position.y = -5;
+      gridHelper.material.opacity = 0.2;
+      gridHelper.material.transparent = true;
+      grid = gridHelper;
+      scene.add(grid);
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+      scene.add(ambientLight);
+      const keyLight = new THREE.PointLight(0x00f0ff, 1.5, 30);
+      keyLight.position.set(5, 5, 8);
+      scene.add(keyLight);
+      const fillLight = new THREE.PointLight(0xff00aa, 1, 25);
+      fillLight.position.set(-5, 2, 6);
+      scene.add(fillLight);
+      const rimLight = new THREE.PointLight(0x7b2dff, 0.8, 20);
+      rimLight.position.set(0, -3, -5);
+      scene.add(rimLight);
+      const topLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      topLight.position.set(0, 10, 5);
+      scene.add(topLight);
+    }
+
+    function onMouseMove(event) {
+      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
+
+    function onWindowResize() {
+      if (!camera || !renderer) return;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+      
+      // Responsive camera position
+      if (width < 480) {
+        camera.position.z = 12;
+      } else if (width < 768) {
+        camera.position.z = 10;
+      } else {
+        camera.position.z = 8;
+      }
+    }
+
+    // Set initial responsive camera
+    function setResponsiveCamera() {
+      const width = window.innerWidth;
+      if (width < 480) {
+        camera.position.z = 12;
+      } else if (width < 768) {
+        camera.position.z = 10;
+      }
+    }
+
+    function onScroll() {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      scrollProgress = window.scrollY / docHeight;
+      
+      // Scroll-based camera zoom (from z=40 to z=25)
+      if (camera) {
+        const targetZ = 40 - (scrollProgress * 15);
+        camera.position.z = targetZ;
+      }
+    }
+
+    function animateThreeJS() {
+      if (!scene || !camera || !renderer) return;
+      
+      const time = Date.now() * 0.001;
+
+      if (!prefersReducedMotion) {
+        if (mainGroup) {
+          mainGroup.children.forEach(child => {
+            if (child.name === 'satellite') {
+              const { speed, offset } = child.userData;
+              child.rotation.x = time * speed + offset;
+              child.rotation.y = time * speed * 0.7 + offset;
+            }
+          });
+
+          // No rotation
+          mainGroup.rotation.y = 0;
+        }
+
+        if (particles) {
+          particles.rotation.y += 0.0003;
+          particles.rotation.x += 0.0001;
+        }
+      }
+
+      // Animation
+      if (window.animMixer && window.modelAnimClip) {
+        const speedMultiplier = 4;
+        const currentTime = scrollProgress * window.modelAnimClip.duration;
+        const delta = (currentTime - (window.lastScrollTime || 0)) * speedMultiplier;
+        window.animMixer.update(delta);
+        window.lastScrollTime = currentTime;
+      }
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animateThreeJS);
+    }
+
+    // Initialize Three.js
+    initThreeJS();
+    animateThreeJS();
+
+    // Event listeners
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('scroll', onScroll);
+
+    // Navigation scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // GSAP Animations
+    if (typeof gsap !== 'undefined' && gsap.registerPlugin) {
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Horizontal scroll for features - desktop only
+      const featuresSection = document.querySelector('.features');
+      const featuresGrid = document.querySelector('.features-grid');
+      const isMobile = window.innerWidth < 768;
+      
+      if (featuresSection && featuresGrid && !isMobile) {
+        const cards = featuresGrid.querySelectorAll('.feature-card');
+        const cardWidth = window.innerWidth < 1024 ? 300 : 380;
+        const gap = 30;
+        const totalScrollWidth = (cardWidth + gap) * cards.length - gap;
+        
+        gsap.to(featuresGrid, {
+          x: -totalScrollWidth + window.innerWidth - 100,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: featuresSection,
+            start: 'top top',
+            end: () => '+=' + totalScrollWidth,
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true
+          }
+        });
+      }
+
+      if (!prefersReducedMotion) {
+        // Hero entrance animation
+        gsap.from('.hero [data-anim]', {
+          y: 40,
+          autoAlpha: 0,
+          duration: 1,
+          ease: 'power3.out',
+          stagger: 0.15,
+          delay: 0.3
+        });
+
+        // Navigation fade in
+        gsap.from('.nav', {
+          y: -20,
+          autoAlpha: 0,
+          duration: 0.8,
+          ease: 'power2.out'
+        });
+
+        // Features section reveal
+        gsap.from('.features .section-header', {
+          scrollTrigger: {
+            trigger: '.features',
+            start: 'top 80%'
+          },
+          y: 40,
+          autoAlpha: 0,
+          duration: 0.8,
+          ease: 'power2.out'
+        });
+
+        gsap.from('.feature-card', {
+          scrollTrigger: {
+            trigger: '.features-grid',
+            start: 'top 80%'
+          },
+          y: 60,
+          autoAlpha: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          stagger: 0.1
+        });
+
+        // Stats section
+        gsap.from('.stats .section-header', {
+          scrollTrigger: {
+            trigger: '.stats',
+            start: 'top 80%'
+          },
+          y: 40,
+          autoAlpha: 0,
+          duration: 0.8,
+          ease: 'power2.out'
+        });
+
+        // Stats counter animation
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+          const target = parseInt(stat.dataset.count);
+          gsap.fromTo(stat, 
+            { textContent: 0 },
+            {
+              textContent: target,
+              duration: 2,
+              ease: 'power2.out',
+              snap: { textContent: 1 },
+              scrollTrigger: {
+                trigger: stat,
+                start: 'top 85%'
+              }
+            }
+          );
+        });
+
+        gsap.from('.stat-item', {
+          scrollTrigger: {
+            trigger: '.stats-grid',
+            start: 'top 80%'
+          },
+          y: 40,
+          autoAlpha: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: 0.1
+        });
+
+        // CTA section
+        gsap.from('.cta-inner', {
+          scrollTrigger: {
+            trigger: '.cta',
+            start: 'top 80%'
+          },
+          y: 40,
+          autoAlpha: 0,
+          duration: 0.8,
+          ease: 'power2.out'
+        });
+
+        // Footer
+        gsap.from('.footer-inner', {
+          scrollTrigger: {
+            trigger: '.footer',
+            start: 'top 90%'
+          },
+          y: 20,
+          autoAlpha: 0,
+          duration: 0.6,
+          ease: 'power2.out'
+        });
+
+        // Parallax on stats/cta
+        ScrollTrigger.create({
+          scrollTrigger: {
+            trigger: '.stats',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1
+          },
+          y: -30
+        });
+      } else {
+        // Reduced motion - just show elements
+        gsap.set('.hero [data-anim]', { autoAlpha: 1, y: 0 });
+        gsap.set('.nav', { autoAlpha: 1, y: 0 });
+      }
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (renderer) {
+        renderer.dispose();
+      }
+    });
+  </script>
+</head>
+<body class="loading">
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <div class="logo">ZIREA</div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#stats">Impact</a></li>
+        <li><a href="#cta">Contact</a></li>
+      </ul>
+      <button class="nav-cta">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- Initial Page Loader -->
+  <div class="page-loader" id="page-loader">
+    <div class="loader-content">
+      <div class="loader-logo">ZIREA</div>
+      <div class="loader-bar">
+        <div class="loader-progress" id="loader-progress"></div>
+      </div>
+      <div class="loader-text" id="loader-text">INITIALIZING...</div>
+    </div>
+  </div>
+
+  <!-- Fixed 3D Background -->
+  <div id="canvas-container">
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-noise"></div>
+    <div class="hero-content">
+      <span class="hero-tag" data-anim>Introducing ZIREA</span>
+      <h1 class="hero-title" data-anim>Build the <span>Future</span> Today</h1>
+      <p class="hero-desc" data-anim>Revolutionary technology that transforms how you create, collaborate, and innovate in the digital age.</p>
+      <button class="hero-cta" data-anim>
+        <span>Explore Now</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+    <div class="scroll-indicator">
+      <div class="mouse"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Features</span>
+        <h2 class="section-title">Pioneering Innovation</h2>
+        <p class="section-desc">Experience next-generation tools designed for the creators of tomorrow.</p>
+      </div>
+      <div class="features-scroll-wrapper">
+        <div class="features-grid">
+          <div class="feature-card" data-anim>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Quantum Processing</h3>
+          <p class="feature-desc">Harness the power of quantum computing to solve complex problems faster than ever before.</p>
+        </div>
+        <div class="feature-card" data-anim>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Real-Time Sync</h3>
+          <p class="feature-desc">Instant synchronization across all devices with zero latency and full data integrity.</p>
+        </div>
+        <div class="feature-card" data-anim>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Military-Grade Security</h3>
+          <p class="feature-desc">Enterprise-level encryption and security protocols protect your most sensitive data.</p>
+        </div>
+        <div class="feature-card" data-anim>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Smart Notifications</h3>
+          <p class="feature-desc">AI-powered notifications that learn your preferences and prioritize what matters most.</p>
+        </div>
+        <div class="feature-card" data-anim>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Modular Architecture</h3>
+          <p class="feature-desc">Fully customizable components that scale with your needs from startup to enterprise.</p>
+        </div>
+        <div class="feature-card" data-anim>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Advanced Analytics</h3>
+          <p class="feature-desc">Deep insights and predictive analytics to drive informed decision-making.</p>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats" id="stats">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Impact</span>
+        <h2 class="section-title">Numbers That Matter</h2>
+        <p class="section-desc">Proven results across global industries.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" data-count="500">0</div>
+          <div class="stat-label">Enterprise Clients</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" data-count="99">0</div>
+          <div class="stat-label">% Uptime</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" data-count="10">0</div>
+          <div class="stat-label">M+ Users</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" data-count="150">0</div>
+          <div class="stat-label">Countries</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta" id="cta">
+    <div class="container">
+      <div class="cta-inner">
+        <h2 class="cta-title">Ready to Transform Your Future?</h2>
+        <p class="cta-desc">Join thousands of forward-thinking companies already building with ZIREA.</p>
+        <a href="#" class="cta-button">
+          <span>Start Your Journey</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-logo">ZIREA</div>
+      <ul class="footer-links">
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Terms</a></li>
+        <li><a href="#">Docs</a></li>
+        <li><a href="#">Support</a></li>
+      </ul>
+      <div class="footer-social">
+        <a href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+        </a>
+        <a href="#" aria-label="GitHub">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </a>
+        <a href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* 
+    ================================================================================
+    TO ADD YOUR SKETCHFAB MODEL (Psychic Cyborg):
+    ================================================================================
+    1. Download the model from: https://sketchfab.com/models/7b62d5a5c30d4faa90150c7295c7b81a
+    2. Save the .glb file in your project folder (e.g., as 'psychic_cyborg.glb')
+    3. Uncomment the GLTFLoader section below and update the model path
+    
+    Example:
+    const loader = new THREE.GLTFLoader();
+    loader.load('psychic_cyborg.glb', (gltf) => {
+      const model = gltf.scene;
+      model.scale.set(2, 2, 2);
+      model.position.set(0, -1, 0);
+      scene.add(model);
+      // Store reference for scroll animation
+      window.cyborgModel = model;
+});
+    ================================================================================
+    */
+  </script>
+</body>
+</html>
